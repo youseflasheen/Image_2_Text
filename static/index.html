@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocExtract — Financial Document OCR</title>
+    <meta name="description" content="Extract structured data from invoices, receipts, and contracts using AI-powered OCR.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+</head>
+<body>
+
+    <!-- Toast container for notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <div class="container">
+
+        <!-- ── Header ────────────────────────────────────────────── -->
+        <header class="header">
+            <div class="header__icon">📄</div>
+            <h1 class="header__title">DocExtract</h1>
+            <p class="header__subtitle">
+                AI-powered extraction from financial documents.
+                Upload or capture — get structured Excel data in seconds.
+            </p>
+        </header>
+
+        <!-- ── Main content area (switches between states) ─────── -->
+        <main id="app-main">
+
+            <!-- STATE 1: Upload -->
+            <section id="state-upload">
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-zone__icon">📤</div>
+                    <h2 class="upload-zone__title">Upload a Document</h2>
+                    <p class="upload-zone__desc">
+                        Drag &amp; drop an image here, or use the buttons below
+                    </p>
+                    <div class="upload-zone__actions">
+                        <button class="btn btn--primary" id="btn-choose-file">
+                            🗂️ Choose File
+                        </button>
+                        <button class="btn btn--secondary" id="btn-camera">
+                            📷 Use Camera
+                        </button>
+                    </div>
+                    <input type="file" id="file-input" accept="image/jpeg,image/png,image/tiff,image/bmp,image/webp">
+
+                    <!-- Image preview (shown after file selected) -->
+                    <div id="image-preview" class="image-preview hidden">
+                        <div class="image-preview__container">
+                            <img id="preview-img" class="image-preview__img" alt="Selected document">
+                            <button class="image-preview__remove" id="btn-remove-preview" title="Remove">✕</button>
+                        </div>
+                        <p class="image-preview__info" id="preview-info"></p>
+                    </div>
+                </div>
+
+                <!-- Process button (shown after file selected) -->
+                <div style="text-align:center; margin-top:1.5rem;">
+                    <button class="btn btn--success btn--lg hidden" id="btn-process">
+                        🚀 Extract Data
+                    </button>
+                </div>
+            </section>
+
+            <!-- STATE 2: Processing -->
+            <section id="state-processing" class="hidden">
+                <div class="processing-card">
+                    <div class="processing-card__spinner"></div>
+                    <h2 class="processing-card__title">Processing your document…</h2>
+                    <p class="processing-card__step" id="processing-step">Uploading image</p>
+
+                    <div class="steps">
+                        <div class="step active" id="step-upload">
+                            <span class="step__dot"></span> Upload
+                        </div>
+                        <div class="step" id="step-ocr">
+                            <span class="step__dot"></span> OCR
+                        </div>
+                        <div class="step" id="step-ai">
+                            <span class="step__dot"></span> AI Extract
+                        </div>
+                        <div class="step" id="step-excel">
+                            <span class="step__dot"></span> Build Excel
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STATE 3: Results / Review -->
+            <section id="state-results" class="hidden">
+                <div class="results-card">
+
+                    <!-- Retry banner (shown after vision fallback) -->
+                    <div id="retry-banner" class="retry-banner hidden">
+                        ⚡ Re-extracted using Gemini Vision (direct image reading)
+                    </div>
+
+                    <div class="results-card__header">
+                        <div class="results-card__title">
+                            ✅ Extraction Complete
+                        </div>
+                        <div class="results-card__badges">
+                            <span class="results-card__badge badge--type" id="badge-type"></span>
+                            <span class="results-card__badge badge--lang" id="badge-lang"></span>
+                            <span class="results-card__badge badge--count" id="badge-count"></span>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="results-card__actions">
+                        <div class="results-card__question">
+                            Does this look right?
+                        </div>
+                        <div class="results-card__actions-left">
+                            <button class="btn btn--danger" id="btn-retry">
+                                🔄 Not Right — Retry
+                            </button>
+                            <button class="btn btn--success" id="btn-download">
+                                📥 Download Excel
+                            </button>
+                            <button class="btn btn--secondary" id="btn-new">
+                                📄 New Document
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ── Footer ────────────────────────────────────────────── -->
+        <footer class="footer">
+            <p>Powered by PaddleOCR + Gemini Flash + openpyxl</p>
+        </footer>
+
+    </div>
+
+    <!-- ── Camera Modal ──────────────────────────────────────────── -->
+    <div id="camera-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">📷 Capture Document</h3>
+                <button class="modal__close" id="btn-camera-close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <video id="camera-video" class="camera-preview" autoplay playsinline></video>
+                <canvas id="camera-canvas" style="display:none;"></canvas>
+            </div>
+            <div class="modal__actions">
+                <button class="btn btn--secondary" id="btn-camera-cancel">Cancel</button>
+                <button class="btn btn--primary" id="btn-camera-capture">📸 Capture</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

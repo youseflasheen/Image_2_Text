@@ -1,0 +1,15 @@
+# AI / LLM Integration (Gemini Vision via OpenRouter)
+openai>=1.12.0
+pydantic>=2.0.0
+
+# Excel export
+openpyxl
+
+# Web backend
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+
+# Image handling
+Pillow
