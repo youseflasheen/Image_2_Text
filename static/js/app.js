@@ -33,7 +33,6 @@ const btnRemovePreview = $("#btn-remove-preview");
 
 const processingStep = $("#processing-step");
 const stepUpload = $("#step-upload");
-const stepOcr = $("#step-ocr");
 const stepAi = $("#step-ai");
 const stepExcel = $("#step-excel");
 
@@ -220,11 +219,11 @@ cameraModal.addEventListener("click", (e) => {
 // ── Processing Pipeline ──────────────────────────────────────────────────────
 function updateProcessingStep(stepId, text) {
     // Mark all steps
-    [stepUpload, stepOcr, stepAi, stepExcel].forEach((s) => {
-        s.classList.remove("active", "done");
+    [stepUpload, stepAi, stepExcel].forEach((s) => {
+        if (s) s.classList.remove("active", "done");
     });
 
-    const order = [stepUpload, stepOcr, stepAi, stepExcel];
+    const order = [stepUpload, stepAi, stepExcel];
     const idx = order.indexOf(document.getElementById(stepId));
 
     for (let i = 0; i < idx; i++) {
@@ -247,8 +246,6 @@ btnProcess.addEventListener("click", async () => {
     try {
         // Simulate step delays for visual feedback
         await delay(400);
-        updateProcessingStep("step-ocr", "Running OCR — extracting text…");
-        await delay(300);
         updateProcessingStep("step-ai", "AI analyzing document…");
 
         const response = await fetch("/api/upload", {
