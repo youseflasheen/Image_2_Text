@@ -23,6 +23,7 @@ const stateResults = $("#state-results");
 
 const uploadZone = $("#upload-zone");
 const fileInput = $("#file-input");
+const cameraInput = $("#camera-input");
 const btnChooseFile = $("#btn-choose-file");
 const btnCamera = $("#btn-camera");
 const btnProcess = $("#btn-process");
@@ -44,13 +45,6 @@ const retryBanner = $("#retry-banner");
 const btnRetry = $("#btn-retry");
 const btnDownload = $("#btn-download");
 const btnNew = $("#btn-new");
-
-const cameraModal = $("#camera-modal");
-const cameraVideo = $("#camera-video");
-const cameraCanvas = $("#camera-canvas");
-const btnCameraClose = $("#btn-camera-close");
-const btnCameraCancel = $("#btn-camera-cancel");
-const btnCameraCapture = $("#btn-camera-capture");
 
 const toastContainer = $("#toast-container");
 
@@ -123,6 +117,11 @@ fileInput.addEventListener("change", (e) => {
     handleFileSelected(e.target.files[0]);
 });
 
+// Camera input change
+cameraInput.addEventListener("change", (e) => {
+    handleFileSelected(e.target.files[0]);
+});
+
 // Choose file button
 btnChooseFile.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -167,53 +166,7 @@ uploadZone.addEventListener("click", (e) => {
 // ── Camera ───────────────────────────────────────────────────────────────────
 btnCamera.addEventListener("click", (e) => {
     e.stopPropagation();
-    openCamera();
-});
-
-async function openCamera() {
-    try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
-        });
-        cameraVideo.srcObject = cameraStream;
-        cameraModal.classList.remove("hidden");
-    } catch (err) {
-        showToast("Camera access denied or not available.", "error");
-        console.error("Camera error:", err);
-    }
-}
-
-function closeCamera() {
-    if (cameraStream) {
-        cameraStream.getTracks().forEach((t) => t.stop());
-        cameraStream = null;
-    }
-    cameraVideo.srcObject = null;
-    cameraModal.classList.add("hidden");
-}
-
-btnCameraClose.addEventListener("click", closeCamera);
-btnCameraCancel.addEventListener("click", closeCamera);
-
-btnCameraCapture.addEventListener("click", () => {
-    const video = cameraVideo;
-    cameraCanvas.width = video.videoWidth;
-    cameraCanvas.height = video.videoHeight;
-    const ctx = cameraCanvas.getContext("2d");
-    ctx.drawImage(video, 0, 0);
-
-    cameraCanvas.toBlob((blob) => {
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        const file = new File([blob], `capture-${timestamp}.jpg`, { type: "image/jpeg" });
-        handleFileSelected(file);
-        closeCamera();
-    }, "image/jpeg", 0.92);
-});
-
-// Close modal on outside click
-cameraModal.addEventListener("click", (e) => {
-    if (e.target === cameraModal) closeCamera();
+    cameraInput.click();
 });
 
 // ── Processing Pipeline ──────────────────────────────────────────────────────

@@ -45,6 +45,7 @@
                         </button>
                     </div>
                     <input type="file" id="file-input" accept="image/jpeg,image/png,image/tiff,image/bmp,image/webp">
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
 
                     <!-- Image preview (shown after file selected) -->
                     <div id="image-preview" class="image-preview hidden">
@@ -141,29 +142,10 @@
 
         <!-- ── Footer ────────────────────────────────────────────── -->
         <footer class="footer">
-            <p>Powered by PaddleOCR + Gemini Flash + openpyxl</p>
+            <p>Powered by Gemini 2.5 Flash Vision</p>
         </footer>
 
     </div>
-
-    <!-- ── Camera Modal ──────────────────────────────────────────── -->
-    <div id="camera-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <div class="modal__header">
-                <h3 class="modal__title">📷 Capture Document</h3>
-                <button class="modal__close" id="btn-camera-close">&times;</button>
-            </div>
-            <div class="modal__body">
-                <video id="camera-video" class="camera-preview" autoplay playsinline></video>
-                <canvas id="camera-canvas" style="display:none;"></canvas>
-            </div>
-            <div class="modal__actions">
-                <button class="btn btn--secondary" id="btn-camera-cancel">Cancel</button>
-                <button class="btn btn--primary" id="btn-camera-capture">📸 Capture</button>
-            </div>
-        </div>
-    </div>
-
     <script src="/static/js/app.js"></script>
 </body>
 </html>
